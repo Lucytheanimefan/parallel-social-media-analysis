@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CS 590 final project</title>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather+Sans|Quicksand|Raleway|Ranga" rel="stylesheet">
+    <!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='plugins/bootstrap.min.css') }}">-->
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='plugins/bootstrap.min.css') }}">
+</head>
+
+<body>
+    <!-- Header start-->
+    <header>
+
+    </header>
+    <div class="container-fluid">
+        {% block body %}{% endblock %}
+    </div>
+    </footer>
+    <script type="text/javascript" src="{{ url_for('static', filename='plugins/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='plugins/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
