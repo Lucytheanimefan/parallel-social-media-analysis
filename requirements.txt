@@ -8,3 +8,4 @@ requests==2.12.1
 Werkzeug==0.11.11
 monkeylearn==0.3.6
 tweepy==3.5.0
+apscheduler==2.1.2

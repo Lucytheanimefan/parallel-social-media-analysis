@@ -94,7 +94,11 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
         if len(re.split(r'[^0-9A-Za-z]+', text)) > min_words:
             tweets.append((text, score))
     print "TWEETS"
-    #print tweets
+    tweets.append(str(time.time()))
+    #write tweets to file
+    f = open(twitter_user+".txt",'w+')
+    f.write(str(tweets))
+    f.close()
     return tweets
 
 def _bing_search(query):
