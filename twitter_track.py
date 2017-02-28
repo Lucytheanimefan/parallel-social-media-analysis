@@ -12,8 +12,9 @@ BING_KEY = 'b1bf79575cfe4a27b972105804809a30'
 EXPAND_TWEETS = True
 
 # This is the twitter user that we will be profiling using our news classifier.
-TWITTER_USER = 'katyperry'
 
+
+TWITTER_USERS = ['NYT','washingtonpost', 'WSJ', 'BBC', 'YahooNews']
 ### Get user data with Twitter API
 import multiprocessing.dummy as multiprocessing
 
@@ -59,7 +60,7 @@ def get_friends_descriptions(api, twitter_account, max_users=100):
     return descriptions
 
 def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_words=5):
-    
+    print "TWITTER USER: "+twitter_user
     tweets = []
     
     full_tweets = []
@@ -153,10 +154,10 @@ def expand_texts(texts):
     return pool.map(_expand_text, queries)
 
 def get_all_tweets():
-    people = ['dango_ramen','sotonami']
+    
     jobs = []
-    for person in people:
-        p = multiprocessing.Process(target=get_tweets, args = (api, person, 'timeline',1000))
+    for twitter_user in TWITTER_USERS:
+        p = multiprocessing.Process(target=get_tweets, args = (api, twitter_user, 'timeline',1000))
         jobs.append(p)
         p.start()
 
@@ -165,7 +166,7 @@ def get_all_tweets():
 
 if __name__ == '__main__':
     # Get the descriptions of the people that twitter_user is following.
-    descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
+    #descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
     print "DESCRIPTIONS"
     #print descriptions
     tweets = []
@@ -175,10 +176,11 @@ if __name__ == '__main__':
     print "Parallel: "
     print (end-start)
 
-    
+    print "SEQUENTIAL STARTING"
     start = time.time()
-    get_tweets(api, 'dango_ramen', 'timeline', 1000)
-    get_tweets(api, 'sotonami', 'timeline', 1000)
+    for twitter_user in TWITTER_USERS:
+        get_tweets(api, twitter_user, 'timeline', 1000)
+        get_tweets(api, twitter_user, 'timeline', 1000)
     end = time.time()
     print "Sequential: "
     print (end-start)
