@@ -22,6 +22,7 @@ import multiprocessing.dummy as multiprocessing
 import tweepy
 import re
 from monkey_learn import *
+import datetime
 import time
 
 # Authenticate to Twitter API
@@ -94,7 +95,8 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
         if len(re.split(r'[^0-9A-Za-z]+', text)) > min_words:
             tweets.append((text, score))
     print "TWEETS"
-    tweets.append(str(time.time()))
+    date = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    tweets.append(str(date))
     #write tweets to file
     f = open("static/"+twitter_user+".txt",'w+')
     f.write(str(tweets))
