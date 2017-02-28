@@ -1,21 +1,21 @@
 # coding: utf-8
 
 ### Set Twitter and MonkeyLearn API credentials
-
-# You can get Twitter API credentials [by signing in with your Twitter account](https://apps.twitter.com) and then registering an app.
-
 # TWITTER SETTINGS
-# Put here your credentials to consume Twitter API
+# Credentials to consume Twitter API
 TWITTER_CONSUMER_KEY = 'gPFX6uLLPSq1YNV3UvOOmxBm9'
 TWITTER_CONSUMER_SECRET = 'A9OFNbEcGFBfV0GNt9dwx2AWncPRrcGBbueVzdl8e3FEdd1EJk'
 TWITTER_ACCESS_TOKEN_KEY = '1486245986-QrZJp6vH6DDzjMJXUCQ0y5sl9eiCJVLRv30agdq'
 TWITTER_ACCESS_TOKEN_SECRET = 'lzXe6UKt8vCPQOR5WesgErMJ8Ip0XpNvhhYLgEmStfF6r'
 
+BING_KEY = 'b1bf79575cfe4a27b972105804809a30'
+EXPAND_TWEETS = True
+
 # This is the twitter user that we will be profiling using our news classifier.
-#TWITTER_USER = 'raulgarreta'
 TWITTER_USER = 'katyperry'
 
 ### Get user data with Twitter API
+import multiprocessing.dummy as multiprocessing
 
 # tweepy is used to call the Twitter API from Python
 import tweepy
@@ -57,12 +57,6 @@ def get_friends_descriptions(api, twitter_account, max_users=100):
     
     return descriptions
 
-# Get the descriptions of the people that twitter_user is following.
-descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
-print "DESCRIPTIONS"
-print descriptions
-
-
 def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_words=5):
     
     tweets = []
@@ -97,23 +91,9 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
         # Only tweets with at least five words.
         if len(re.split(r'[^0-9A-Za-z]+', text)) > min_words:
             tweets.append((text, score))
-            
+    print "TWEETS"
+    print tweets
     return tweets
-
-tweets = []
-tweets.extend(get_tweets(api, TWITTER_USER, 'timeline', 1000))  # 400 = 2 requests (out of 15 in the window).
-tweets.extend(get_tweets(api, TWITTER_USER, 'favorites', 400))  # 1000 = 5 requests (out of 180 in the window).
-
-tweets = map(lambda t: t[0], sorted(tweets, key=lambda t: t[1], reverse=True))[:500]
-
-print "TWEETS---------"
-print tweets
-
-
-import multiprocessing.dummy as multiprocessing
-
-BING_KEY = ''
-EXPAND_TWEETS = False
 
 def _bing_search(query):
     
@@ -171,108 +151,34 @@ def expand_texts(texts):
     pool = multiprocessing.Pool(2)
     return pool.map(_expand_text, queries)
 
+def get_all_tweets():
+    people = ['dango_ramen','sotonami']
+    jobs = []
+    for person in people:
+        p = multiprocessing.Process(target=get_tweets, args = (api, person, 'timeline',400))
+        jobs.append(p)
+        p.start()
 
-# Use Bing search to expand the context of descriptions
-expanded_descriptions = descriptions_english
-#expanded_descriptions = expand_texts(descriptions_english)
 
 
+
+if __name__ == '__main__':
+    # Get the descriptions of the people that twitter_user is following.
+    descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
+    print "DESCRIPTIONS"
+    #print descriptions
+    tweets = []
+    get_all_tweets()
+    #tweets.extend(get_tweets(api, TWITTER_USER, 'timeline', 1000))  # 400 = 2 requests (out of 15 in the window).
+    #tweets.extend(get_tweets(api, TWITTER_USER, 'favorites', 400))  # 1000 = 5 requests (out of 180 in the window).
+    #tweets_english = map(lambda t: t[0], sorted(tweets, key=lambda t: t[1], reverse=True))[:500]
+
+    '''
 # Use Bing search to expand the context of tweets
 if EXPAND_TWEETS:
     expanded_tweets = expand_texts(tweets_english)
+    print "EXPANDED TWEETS"
+    print expanded_tweets
 else:
     expanded_tweets = tweets_english
-
-
-'''
-
-### Plot the most popular topics
-
-get_ipython().magic(u'matplotlib inline')
-import matplotlib.pyplot as plt
-
-# Add the two histograms (bios and tweets) to a total histogram
-total_histogram = tweets_histogram + descriptions_histogram
-
-# Get the top N categories by frequency
-max_categories = 6
-top_categories, values = zip(*total_histogram.most_common(max_categories))
-
-# Plot the distribution of the top categories with a pie chart
-plt.figure(1, figsize=(5,5))
-ax = plt.axes([0.1, 0.1, 0.8, 0.8])
-
-plt.pie(
-    values,
-    labels=top_categories,
-    shadow=True,
-    colors = [
-        (0.86, 0.37, 0.34), (0.86, 0.76, 0.34), (0.57, 0.86, 0.34), (0.34, 0.86, 0.50),
-        (0.34, 0.83, 0.86), (0.34, 0.44, 0.86), (0.63, 0.34, 0.86), (0.86, 0.34, 0.70),
-    ],
-    radius=20,
-    autopct='%1.f%%',
-)
-
-plt.axis('equal')
-plt.show()
-'''
-
-
-
-
-from IPython.display import Javascript
-
-libs = [
-    "http://d3js.org/d3.v3.min.js",
-    "http://www.jasondavies.com/wordcloud/d3.layout.cloud.js"
-]
-
-def plot_wordcloud(wordcloud):
-    return Javascript("""
-                var fill = d3.scale.category20b();
-
-                var cloudNode = $('<div id="wordcloud"></div>');
-                element.append(cloudNode);
-
-                var wordData = JSON.parse('%s');
-                console.log(wordData);
-
-                function draw(words) {
-                    d3.select("#wordcloud").append("svg")
-                        .attr("width", 600)
-                        .attr("height", 502)
-                        .append("g")
-                        .attr("transform", "translate(300,160)")
-                        .selectAll("text")
-                        .data(words)
-                        .enter().append("text")
-                        .style("font-size", function (d) { return d.size + "px"; })
-                        .style("font-family", "impact")
-                        .style("fill", function (d, i) { return fill(i); })
-                        .attr("text-anchor", "middle")
-                        .attr("transform", function (d) {
-                            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                        })
-                        .text(function (d) { return d.text; });
-                }
-                console.log($("#wordcloud"));
-
-                d3.layout.cloud().size([600, 502])
-                    .timeInterval(10)
-                    .words(wordData)
-                    .padding(1)
-                    .rotate(function () { return 0; })
-                    .font('impact')
-                    .fontSize(function (d) { return d.size; })
-                    .on("end", draw)
-                    .start();
-
-        """ % json.dumps(wordcloud), lib=libs)
-
-
-wordcloud = map(
-    lambda s: {'text': s['keyword'], 'size': 15 + 40*float(s['relevance'])},
-    keywords['Society/Special Occasions']
-)
-plot_wordcloud(wordcloud)
+    '''
