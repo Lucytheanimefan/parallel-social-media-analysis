@@ -96,7 +96,7 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
     print "TWEETS"
     tweets.append(str(time.time()))
     #write tweets to file
-    f = open(twitter_user+".txt",'w+')
+    f = open("static/"+twitter_user+".txt",'w+')
     f.write(str(tweets))
     f.close()
     return tweets
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     print "Parallel: "
     print (end-start)
 
-    print "SEQUENTIAL STARTING"
+    print "--------------SEQUENTIAL STARTING------------"
     start = time.time()
     for twitter_user in TWITTER_USERS:
         get_tweets(api, twitter_user, 'timeline', 1000)
