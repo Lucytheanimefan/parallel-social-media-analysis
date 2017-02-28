@@ -21,6 +21,7 @@ import multiprocessing.dummy as multiprocessing
 import tweepy
 import re
 from monkey_learn import *
+import time
 
 # Authenticate to Twitter API
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
@@ -92,7 +93,7 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
         if len(re.split(r'[^0-9A-Za-z]+', text)) > min_words:
             tweets.append((text, score))
     print "TWEETS"
-    print tweets
+    #print tweets
     return tweets
 
 def _bing_search(query):
@@ -155,7 +156,7 @@ def get_all_tweets():
     people = ['dango_ramen','sotonami']
     jobs = []
     for person in people:
-        p = multiprocessing.Process(target=get_tweets, args = (api, person, 'timeline',400))
+        p = multiprocessing.Process(target=get_tweets, args = (api, person, 'timeline',1000))
         jobs.append(p)
         p.start()
 
@@ -168,7 +169,21 @@ if __name__ == '__main__':
     print "DESCRIPTIONS"
     #print descriptions
     tweets = []
+    start = time.time()
     get_all_tweets()
+    end = time.time()
+    print "Parallel: "
+    print (end-start)
+
+    
+    start = time.time()
+    get_tweets(api, 'dango_ramen', 'timeline', 1000)
+    get_tweets(api, 'sotonami', 'timeline', 1000)
+    end = time.time()
+    print "Sequential: "
+    print (end-start)
+
+
     #tweets.extend(get_tweets(api, TWITTER_USER, 'timeline', 1000))  # 400 = 2 requests (out of 15 in the window).
     #tweets.extend(get_tweets(api, TWITTER_USER, 'favorites', 400))  # 1000 = 5 requests (out of 180 in the window).
     #tweets_english = map(lambda t: t[0], sorted(tweets, key=lambda t: t[1], reverse=True))[:500]
