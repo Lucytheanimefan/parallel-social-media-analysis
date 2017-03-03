@@ -17,18 +17,22 @@ EXPAND_TWEETS = True
 TWITTER_USERS = ['NYT','washingtonpost', 'WSJ', 'BBC', 'YahooNews']
 ### Get user data with Twitter API
 import multiprocessing.dummy as multiprocessing
-
+from multiprocessing import Pool
 # tweepy is used to call the Twitter API from Python
 import tweepy
 import re
 from monkey_learn import *
 import datetime
 import time
+from MyStreamListener import *
 
 # Authenticate to Twitter API
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 auth.set_access_token(TWITTER_ACCESS_TOKEN_KEY, TWITTER_ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
+
+listen = MyStreamListener()
+stream = tweepy.Stream(auth, listen)
 
 from random import shuffle
 
@@ -60,6 +64,7 @@ def get_friends_descriptions(api, twitter_account, max_users=100):
     
     return descriptions
 
+#potential to parallelize
 def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_words=5):
     print "TWITTER USER: "+twitter_user
     tweets = []
@@ -84,17 +89,9 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
         
         full_tweets.extend(current)
     
-    for tweet in full_tweets:
-        text = re.sub(r'(https?://\S+)', '', tweet.text)
-        
-        score = tweet.favorite_count + tweet.retweet_count
-        if tweet.in_reply_to_status_id_str:
-            score -= 15
+    [tweets.append({"Text":re.sub(r'(https?://\S+)', '', tweet.text), "Favorites":tweet.favorite_count, "Retweets":tweet.retweet_count, "url":"https://twitter.com/"+twitter_user+"/status/"+tweet.id_str,"Created_at":tweet.created_at}) for tweet in full_tweets]
 
-        # Only tweets with at least five words.
-        if len(re.split(r'[^0-9A-Za-z]+', text)) > min_words:
-            tweets.append((text, score))
-    print "TWEETS"
+    print "TWEETS "+twitter_user
     date = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
     tweets.append(str(date))
     #write tweets to file
@@ -173,8 +170,10 @@ def get_all_tweets():
 if __name__ == '__main__':
     # Get the descriptions of the people that twitter_user is following.
     #descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
-    print "DESCRIPTIONS"
+    #print "DESCRIPTIONS"
+    #stream.filter(follow=TWITTER_USERS,async=True)
     #print descriptions
+
     tweets = []
     start = time.time()
     get_all_tweets()
@@ -182,26 +181,16 @@ if __name__ == '__main__':
     print "Parallel: "
     print (end-start)
 
+    '''
     print "--------------SEQUENTIAL STARTING------------"
     start = time.time()
     for twitter_user in TWITTER_USERS:
         get_tweets(api, twitter_user, 'timeline', 1000)
-        get_tweets(api, twitter_user, 'timeline', 1000)
     end = time.time()
     print "Sequential: "
     print (end-start)
-
-
-    #tweets.extend(get_tweets(api, TWITTER_USER, 'timeline', 1000))  # 400 = 2 requests (out of 15 in the window).
-    #tweets.extend(get_tweets(api, TWITTER_USER, 'favorites', 400))  # 1000 = 5 requests (out of 180 in the window).
-    #tweets_english = map(lambda t: t[0], sorted(tweets, key=lambda t: t[1], reverse=True))[:500]
-
     '''
-# Use Bing search to expand the context of tweets
-if EXPAND_TWEETS:
-    expanded_tweets = expand_texts(tweets_english)
-    print "EXPANDED TWEETS"
-    print expanded_tweets
-else:
-    expanded_tweets = tweets_english
-    '''
+    
+   
+
+
