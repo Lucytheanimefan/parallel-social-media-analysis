@@ -1,19 +1,20 @@
-from flask import Flask, render_template,send_from_directory
+from flask import Flask, render_template,send_from_directory, jsonify
 import flask
 import os
 from apscheduler.scheduler import Scheduler
 import twitter_track
 import atexit
 import text_analysis
+from flask_cors import CORS
 
 app = Flask(__name__)
 cron = Scheduler(daemon=True)
 # Explicitly kick off the background thread
 cron.start()
 
+CORS(app)
 
-
-@cron.interval_schedule(hours=0.001) #every 6 minutes
+@cron.interval_schedule(hours=0.06) #every 6 minutes
 def retrieve_tweets():
 	twitter_track.get_all_tweets()
 
@@ -22,16 +23,19 @@ def home():
 	return render_template("index.html")
 
 
-@app.route('/<media_site>', methods=['GET'])
+@app.route('/<media_site>', methods=['GET','POST'])
 def text_file(media_site):
     #do your code here
     return send_from_directory(app.static_folder, media_site)
 
 
-@app.route('/.txt')
-@app.route('/sitemap.xml')
-def static_from_root():
-    return send_from_directory(app.static_folder, request.path[1:])
+@app.route("/get_tweets", methods = ["GET"])
+def get_tweets():
+	#print text_analysis.pure_text_from_file("NYT.txt")
+	return str(text_analysis.pure_text_from_file("NYT.txt"))
+#@app.route('/.txt', methods)
+#def static_from_root():
+#    return send_from_directory(app.static_folder, request.path[1:])
 
 
 
