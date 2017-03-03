@@ -22,9 +22,11 @@ from multiprocessing import Pool
 import tweepy
 import re
 from monkey_learn import *
-import datetime
 import time
 from MyStreamListener import *
+from pytz import timezone
+import datetime
+from datetime import datetime
 
 # Authenticate to Twitter API
 auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
@@ -92,8 +94,9 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
     [tweets.append({"Text":re.sub(r'(https?://\S+)', '', tweet.text), "Favorites":tweet.favorite_count, "Retweets":tweet.retweet_count, "url":"https://twitter.com/"+twitter_user+"/status/"+tweet.id_str,"Created_at":tweet.created_at}) for tweet in full_tweets]
 
     print "TWEETS "+twitter_user
-    date = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-    tweets.append(str(date))
+    fmt = "%Y-%m-%d %H:%M:%S %Z%z"
+    now_time = datetime.now(timezone('US/Eastern'))
+    tweets.append(now_time.strftime(fmt))
     #write tweets to file
     f = open("static/"+twitter_user+".txt",'w+')
     f.write(str(tweets))
