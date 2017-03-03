@@ -19,8 +19,8 @@ MONKEYLEARN_EXTRACTOR_ID = 'ex_y7BPYzNG'
 
 #works best in arrays of 25
 def extract_topic(batched_array):
-    print "A batch"
-    print len(batched_array)
+    #print "A batch"
+    #print len(batched_array)
     res = ml.extractors.extract(MONKEYLEARN_EXTRACTOR_ID , [str(tweet['Text'].encode('ascii','ignore')) for tweet in batched_array if type(tweet) is dict and len(tweet['Text'])>1])
     return res.result
 

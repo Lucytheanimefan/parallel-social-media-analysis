@@ -7,7 +7,6 @@ from monkey_learn import extract_topic
 import datetime
 from twitter_track import TWITTER_USERS
 import time
-import numpy as np
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 APP_STATIC = os.path.join(APP_ROOT, 'static')
@@ -23,18 +22,12 @@ def pure_text_from_file(file_name):
 	lines = file.read()
 	return lines
 
-def split_list(alist, wanted_parts=1):
-    length = len(alist)
-    return [ alist[i*length // wanted_parts: (i+1)*length // wanted_parts] 
-             for i in range(wanted_parts) ]
 
 def get_topics():
 	pool = Pool()
-	unmerged= pool.map(text_from_file,[user+".txt" for user in TWITTER_USERS])
-	res = [item for sublist in unmerged for item in sublist]
-	#print split_list(res,len(res)/25)
+	res= pool.map(text_from_file,[user+".txt" for user in TWITTER_USERS])
 	pool2 = Pool()
-	res2= pool2.map(extract_topic, split_list(res,len(res)/25))
+	res2= pool2.map(extract_topic, res)
 	#print res2
 	return res2
 
@@ -49,11 +42,16 @@ def funSquare(num):
 
 if __name__ == '__main__':
 	start = time.time()
-	print len(get_topics())
+	print(len(get_topics()))
 	end = time.time()
-	print "Parallel: "
+	print "parallel: "
 	print (end-start)
-
+	
+	start = time.time()
+	seq_topics()
+	end = time.time()
+	print "Sequential: "
+	print (end-start)
     
 
 	#pool = multiprocessing.Pool()
