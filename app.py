@@ -4,6 +4,7 @@ import os
 from apscheduler.scheduler import Scheduler
 import twitter_track
 import atexit
+import text_analysis
 
 app = Flask(__name__)
 cron = Scheduler(daemon=True)
@@ -12,14 +13,13 @@ cron.start()
 
 
 
-@cron.interval_schedule(hours=0.01) #every 6 minutes
+@cron.interval_schedule(hours=0.001) #every 6 minutes
 def retrieve_tweets():
-	print '-----RETRIEVE TWEET-----'
 	twitter_track.get_all_tweets()
 
 @app.route("/")
 def home():
-	return "Hello world"
+	return render_template("index.html")
 
 
 @app.route('/<media_site>', methods=['GET'])
@@ -32,6 +32,7 @@ def text_file(media_site):
 @app.route('/sitemap.xml')
 def static_from_root():
     return send_from_directory(app.static_folder, request.path[1:])
+
 
 
 atexit.register(lambda: cron.shutdown(wait=False))
