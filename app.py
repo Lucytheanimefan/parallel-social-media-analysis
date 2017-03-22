@@ -26,7 +26,7 @@ def home():
 @app.route('/<media_site>', methods=['GET','POST'])
 def text_file(media_site):
     #do your code here
-    return send_from_directory(app.static_folder, media_site)
+    return send_from_directory(app.static_folder, media_site+".txt")
 
 
 @app.route("/get_tweets", methods = ["GET"])
