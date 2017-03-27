@@ -91,8 +91,8 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
             current = api.favorites(twitter_user, **kwargs)
         
         full_tweets.extend(current)
-    
-    [tweets.append({"Text":re.sub(r'(https?://\S+)', '', tweet.text), "Favorites":tweet.favorite_count, "Retweets":tweet.retweet_count, "url":"https://twitter.com/"+twitter_user+"/status/"+tweet.id_str,"id":tweet.id_str,"Created_at":tweet.created_at}) for tweet in full_tweets]
+
+    [tweets.append({"Text":re.sub(r'(https?://\S+)', '', tweet.text), "Favorites":tweet.favorite_count, "Retweets":tweet.retweet_count, "url":"https://twitter.com/"+twitter_user+"/status/"+tweet.id_str,"id":tweet.id_str,"Created_at":tweet.created_at,"Replies":tweet_replies(str(tweet.id),twitter_user)}) for tweet in full_tweets]
 
     print "TWEETS "+twitter_user
     fmt = "%Y-%m-%d %H:%M:%S %Z%z"
@@ -108,11 +108,13 @@ def tweet_replies(tweet_id, user):
     searched_tweets = []
     old_searched_tweets = []
     last_id = -1
-    max_tweets=1000000
+    max_tweets=100
     query = "@"+user
     while len(searched_tweets)<max_tweets:
         count = max_tweets - len(old_searched_tweets)
         print count
+        if count<0:
+            break
         #try:
         new_tweets = api.search(q=query, count=count, max_id=str(last_id - 1))
         print "Old searched tweets" + str(len(old_searched_tweets))
@@ -196,7 +198,7 @@ def get_all_tweets():
     
     jobs = []
     for twitter_user in TWITTER_USERS:
-        p = multiprocessing.Process(target=get_tweets, args = (api, twitter_user, 'timeline',1000))
+        p = multiprocessing.Process(target=get_tweets, args = (api, twitter_user, 'timeline',1000000))
         jobs.append(p)
         p.start()
 
@@ -204,10 +206,11 @@ def get_all_tweets():
 
 if __name__ == '__main__':
     #tweet_replies("844728600137875456","GiggukAZ")
+    #get_tweets(api, TWITTER_USERS[0], 'timeline', 100)
     # Get the descriptions of the people that twitter_user is following.
     #descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
     #print "DESCRIPTIONS"
-    stream.filter(track=TWITTER_USERS[0],async=True)
+    stream.filter(track=TWITTER_USERS,async=True)
 
     #print descriptions
 
