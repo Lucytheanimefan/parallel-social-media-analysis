@@ -20,6 +20,7 @@ import multiprocessing.dummy as multiprocessing
 from multiprocessing import Pool
 # tweepy is used to call the Twitter API from Python
 import tweepy
+from tweepy.streaming import StreamListener
 import re
 from monkey_learn import *
 import time
@@ -130,8 +131,8 @@ def tweet_replies(tweet_id, user):
         searched_tweets.extend(new_tweets)
         last_id = unused_tweets[-1].id
         #print "last id: "+str(last_id)
-    print "DONE"
-    print searched_tweets
+    #print "DONE"
+    #print searched_tweets
     return searched_tweets
 
 
@@ -201,13 +202,13 @@ def get_all_tweets():
 
 
 
-
 if __name__ == '__main__':
-    tweet_replies("844728600137875456","GiggukAZ")
+    #tweet_replies("844728600137875456","GiggukAZ")
     # Get the descriptions of the people that twitter_user is following.
     #descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
     #print "DESCRIPTIONS"
-    #stream.filter(follow=TWITTER_USERS,async=True)
+    stream.filter(track=TWITTER_USERS,async=True)
+
     #print descriptions
 
     #tweets = []
