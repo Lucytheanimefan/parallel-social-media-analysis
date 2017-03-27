@@ -207,7 +207,7 @@ if __name__ == '__main__':
     # Get the descriptions of the people that twitter_user is following.
     #descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
     #print "DESCRIPTIONS"
-    stream.filter(track=TWITTER_USERS,async=True)
+    stream.filter(track=TWITTER_USERS[0],async=True)
 
     #print descriptions
 
