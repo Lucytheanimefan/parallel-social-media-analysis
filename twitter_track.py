@@ -111,25 +111,26 @@ def tweet_replies(tweet_id, user):
     query = "@"+user
     while len(searched_tweets)<max_tweets:
         count = max_tweets - len(old_searched_tweets)
+        print count
         #try:
         new_tweets = api.search(q=query, count=count, max_id=str(last_id - 1))
+        print "Old searched tweets" + str(len(old_searched_tweets))
         #print "New tweets"
         #print [[tweet.text, tweet.in_reply_to_user_id,tweet.in_reply_to_status_id] for tweet in new_tweets]
         if not new_tweets:
+            print "breaking"
             break
-        #for tweet in new_tweets:
-        #    print tweet.in_reply_to_user_id +"vs" + tweet_id
+
         unused_tweets = new_tweets
-        new_tweets = [tweet.text for tweet in new_tweets if tweet_id is tweet.in_reply_to_status_id]
+        #for tweet in new_tweets:
+        #    print tweet.in_reply_to_status_id
+        new_tweets = [tweet.text for tweet in new_tweets if tweet_id == str(tweet.in_reply_to_status_id)]
         print new_tweets
         old_searched_tweets.extend(unused_tweets)
         searched_tweets.extend(new_tweets)
         last_id = unused_tweets[-1].id
-        print "last id: "+str(last_id)
-        #except tweepy.TweepError[-1] as e:
-        #    break
-
-    #searched_tweets = [status for status in tweepy.Cursor(api.search, q=query).items(max_tweets)]
+        #print "last id: "+str(last_id)
+    print "DONE"
     print searched_tweets
     return searched_tweets
 
