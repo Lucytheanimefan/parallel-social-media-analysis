@@ -105,11 +105,12 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
 
 def tweet_replies(tweet_id, user):
     searched_tweets = []
+    old_searched_tweets = []
     last_id = -1
-    max_tweets=100
+    max_tweets=1000000
     query = "@"+user
     while len(searched_tweets)<max_tweets:
-        count = max_tweets - len(searched_tweets)
+        count = max_tweets - len(old_searched_tweets)
         #try:
         new_tweets = api.search(q=query, count=count, max_id=str(last_id - 1))
         #print "New tweets"
@@ -118,10 +119,12 @@ def tweet_replies(tweet_id, user):
             break
         #for tweet in new_tweets:
         #    print tweet.in_reply_to_user_id +"vs" + tweet_id
+        unused_tweets = new_tweets
         new_tweets = [tweet.text for tweet in new_tweets if tweet_id is tweet.in_reply_to_status_id]
         print new_tweets
+        old_searched_tweets.extend(unused_tweets)
         searched_tweets.extend(new_tweets)
-        last_id = new_tweets[-1].id
+        last_id = unused_tweets[-1].id
         print "last id: "+str(last_id)
         #except tweepy.TweepError[-1] as e:
         #    break
