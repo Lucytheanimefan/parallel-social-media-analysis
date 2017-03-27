@@ -91,7 +91,7 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
         
         full_tweets.extend(current)
     
-    [tweets.append({"Text":re.sub(r'(https?://\S+)', '', tweet.text), "Favorites":tweet.favorite_count, "Retweets":tweet.retweet_count, "url":"https://twitter.com/"+twitter_user+"/status/"+tweet.id_str,"Created_at":tweet.created_at}) for tweet in full_tweets]
+    [tweets.append({"Text":re.sub(r'(https?://\S+)', '', tweet.text), "Favorites":tweet.favorite_count, "Retweets":tweet.retweet_count, "url":"https://twitter.com/"+twitter_user+"/status/"+tweet.id_str,"id":tweet.id_str,"Created_at":tweet.created_at}) for tweet in full_tweets]
 
     print "TWEETS "+twitter_user
     fmt = "%Y-%m-%d %H:%M:%S %Z%z"
@@ -102,6 +102,34 @@ def get_tweets(api, twitter_user, tweet_type='timeline', max_tweets=200, min_wor
     f.write(str(tweets))
     f.close()
     return tweets
+
+def tweet_replies(tweet_id, user):
+    searched_tweets = []
+    last_id = -1
+    max_tweets=100
+    query = "@"+user
+    while len(searched_tweets)<max_tweets:
+        count = max_tweets - len(searched_tweets)
+        #try:
+        new_tweets = api.search(q=query, count=count, max_id=str(last_id - 1))
+        #print "New tweets"
+        #print [[tweet.text, tweet.in_reply_to_user_id,tweet.in_reply_to_status_id] for tweet in new_tweets]
+        if not new_tweets:
+            break
+        #for tweet in new_tweets:
+        #    print tweet.in_reply_to_user_id +"vs" + tweet_id
+        new_tweets = [tweet.text for tweet in new_tweets if tweet_id is tweet.in_reply_to_status_id]
+        print new_tweets
+        searched_tweets.extend(new_tweets)
+        last_id = new_tweets[-1].id
+        print "last id: "+str(last_id)
+        #except tweepy.TweepError[-1] as e:
+        #    break
+
+    #searched_tweets = [status for status in tweepy.Cursor(api.search, q=query).items(max_tweets)]
+    print searched_tweets
+    return searched_tweets
+
 
 def _bing_search(query):
     
@@ -171,18 +199,19 @@ def get_all_tweets():
 
 
 if __name__ == '__main__':
+    tweet_replies("844728600137875456","GiggukAZ")
     # Get the descriptions of the people that twitter_user is following.
     #descriptions = get_friends_descriptions(api, TWITTER_USER, max_users=300)
     #print "DESCRIPTIONS"
     #stream.filter(follow=TWITTER_USERS,async=True)
     #print descriptions
 
-    tweets = []
-    start = time.time()
-    get_all_tweets()
-    end = time.time()
-    print "Parallel: "
-    print (end-start)
+    #tweets = []
+    #start = time.time()
+    #get_all_tweets()
+    #end = time.time()
+    #print "Parallel: "
+    #print (end-start)
 
     '''
     print "--------------SEQUENTIAL STARTING------------"
